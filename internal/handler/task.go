@@ -24,16 +24,22 @@ type TaskResponse struct {
 }
 
 func CreateTask(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		log.Printf("[HANDLER][ERROR] Метод %s не поддерживается", r.Method)
+		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 
 	task, err := service.StartTask()
 	if err != nil {
-		log.Printf("[ERROR] Не удалось создать задачу: %v", err)
+		log.Printf("[HANDLER][ERROR] Ошибка при запуске задачи: %v", err)
 		http.Error(w, "Что-то пошло не так с задачей", http.StatusInternalServerError)
 		return
 	}
 
-	log.Printf("[HANDLER] Создана задача с ID %s", task.ID)
+	log.Printf("[HANDLER][POST] Задача создана: ID=%s", task.ID)
 
 	data := TaskResponse{
 		ID:     task.ID,
@@ -56,6 +62,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Printf("[HANDLER][ERROR] Ошибка сериализации ответа: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -65,19 +72,19 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 
 	id := strings.TrimPrefix(r.URL.Path, "/task/")
 	if id == "" {
-		log.Printf("[WARN] Пустой ID в запросе")
+		log.Println("[HANDLER][WARN] Пустой ID задачи в запросе")
 		http.Error(w, "ID задачи не указан", http.StatusBadRequest)
 		return
 	}
 
 	task, found := service.GetTaskByID(id)
 	if !found {
-		log.Printf("[WARN] Задача с ID %s не найдена", id)
+		log.Printf("[HANDLER][WARN] Задача не найдена: ID=%s", id)
 		http.Error(w, "Задача не найдена", http.StatusNotFound)
 		return
 	}
 
-	log.Printf("[HANDLER] Получена задача ID %s, статус: %s", task.ID, task.Status)
+	log.Printf("[HANDLER][GET] Задача найдена: ID=%s, статус=%s", task.ID, task.Status)
 
 	data := TaskResponse{
 		ID:     task.ID,
@@ -86,14 +93,15 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 		Error:  task.Error,
 	}
 
-	resp := Response{
+	response := Response{
 		Status:     "success",
 		StatusCode: http.StatusOK,
 		Data:       data,
 	}
 
 	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Printf("[HANDLER][ERROR] Ошибка сериализации ответа: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
