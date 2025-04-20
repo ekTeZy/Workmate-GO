@@ -1,3 +1,4 @@
+// Package service содержит функции для управления задачами в системе.
 package service
 
 import (
@@ -10,10 +11,12 @@ import (
 	"github.com/google/uuid"
 )
 
+// init инициализирует генератор случайных чисел с использованием текущего времени в наносекундах.
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+// CreateTask создает новую задачу с уникальным идентификатором и статусом Pending.
 func CreateTask() *model.Task {
 	id := uuid.NewString()
 
@@ -27,6 +30,8 @@ func CreateTask() *model.Task {
 	return task
 }
 
+// StartTask создает новую задачу и сохраняет её в репозитории.
+// Если сохранение прошло успешно, задача запускается в фоновом режиме.
 func StartTask() (*model.Task, error) {
 	task := CreateTask()
 
@@ -42,6 +47,8 @@ func StartTask() (*model.Task, error) {
 	return task, nil
 }
 
+// RunTask выполняет задачу, имитируя долгую операцию.
+// В зависимости от результата выполнения, задача обновляется со статусом Done или Error.
 func RunTask(t *model.Task) {
 	log.Printf("[SERVICE][RUN] Задача ID=%s: установка статуса running", t.ID)
 	repository.UpdateStatus(t.ID, model.StatusRunning, "")
@@ -58,6 +65,7 @@ func RunTask(t *model.Task) {
 	}
 }
 
+// GetTaskByID получает задачу по её идентификатору из репозитория.
 func GetTaskByID(id string) (*model.Task, bool) {
 	return repository.GetTaskByID(id)
 }

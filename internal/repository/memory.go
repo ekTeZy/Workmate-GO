@@ -12,6 +12,8 @@ var (
 	mu    sync.RWMutex
 )
 
+// SaveTask сохраняет задачу в памяти.
+// Если задача с таким ID уже существует, возвращает ошибку.
 func SaveTask(task *model.Task) error {
 	mu.Lock()
 	defer mu.Unlock()
@@ -25,6 +27,9 @@ func SaveTask(task *model.Task) error {
 	return nil
 }
 
+// UpdateStatus обновляет статус задачи по ID.
+// Если задача с таким ID не существует, возвращает ошибку.
+// Если статус задачи изменен на "Выполнено" или "Ошибка", обновляет результат задачи.
 func UpdateStatus(id string, status model.TaskStatus, taskResult string) error {
 	mu.Lock()
 	defer mu.Unlock()
@@ -43,6 +48,8 @@ func UpdateStatus(id string, status model.TaskStatus, taskResult string) error {
 	return nil
 }
 
+// GetTaskByID возвращает задачу по ID.
+// Если задача с таким ID не существует, возвращает false.
 func GetTaskByID(id string) (*model.Task, bool) {
 	mu.RLock()
 	defer mu.RUnlock()
