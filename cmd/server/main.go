@@ -13,8 +13,8 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", rootHandler)
+	mux.HandleFunc("/task/", handler.GetTask)
 	mux.HandleFunc("/task", handler.CreateTask)
-	mux.HandleFunc("/task/{id}", handler.GetTask)
 
 	addr := ":" + cfg.Port
 	log.Println("Сервер запущен на", addr)
