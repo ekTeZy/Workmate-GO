@@ -8,6 +8,7 @@ import (
 
 	"github.com/ekTeZy/Workmate-GO/internal/model"
 	"github.com/ekTeZy/Workmate-GO/internal/service"
+	"github.com/google/uuid"
 )
 
 type Response struct {
@@ -74,6 +75,12 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 	if id == "" {
 		log.Println("[HANDLER][WARN] Пустой ID задачи в запросе")
 		http.Error(w, "ID задачи не указан", http.StatusBadRequest)
+		return
+	}
+
+	if _, err := uuid.Parse(id); err != nil {
+		log.Printf("[HANDLER][WARN] Неверный формат ID: %s", id)
+		http.Error(w, "Неверный формат ID", http.StatusBadRequest)
 		return
 	}
 
