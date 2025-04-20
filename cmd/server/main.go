@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ekTeZy/Workmate-GO/internal/config"
+	"github.com/ekTeZy/Workmate-GO/internal/handler"
 )
 
 func main() {
@@ -12,6 +13,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", rootHandler)
+	mux.HandleFunc("/task", handler.CreateTask)
 
 	addr := ":" + cfg.Port
 	log.Println("Сервер запущен на", addr)
