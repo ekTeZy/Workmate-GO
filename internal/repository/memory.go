@@ -42,3 +42,11 @@ func UpdateStatus(id string, status model.TaskStatus, taskResult string) error {
 
 	return nil
 }
+
+func GetTaskByID(id string) (*model.Task, bool) {
+	mu.RLock()
+	defer mu.RUnlock()
+
+	task, ok := tasks[id]
+	return task, ok
+}
