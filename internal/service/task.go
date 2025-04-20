@@ -22,7 +22,7 @@ func CreateTask() *model.Task {
 		Status: model.StatusPending,
 	}
 
-	log.Printf("[NEW] Создана задача с ID %s", id)
+	log.Printf("[SERVICE][NEW] Создана задача: ID=%s", id)
 
 	return task
 }
@@ -32,27 +32,29 @@ func StartTask() (*model.Task, error) {
 
 	err := repository.SaveTask(task)
 	if err != nil {
+		log.Printf("[SERVICE][ERROR] Не удалось сохранить задачу ID=%s: %v", task.ID, err)
 		return task, err
 	}
 
+	log.Printf("[SERVICE][START] Задача сохранена и запущена в фоне: ID=%s", task.ID)
 	go RunTask(task)
 
 	return task, nil
 }
 
 func RunTask(t *model.Task) {
-	log.Printf("[RUNNING] Задача %s: статус установлен в running", t.ID)
+	log.Printf("[SERVICE][RUN] Задача ID=%s: установка статуса running", t.ID)
 	repository.UpdateStatus(t.ID, model.StatusRunning, "")
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(5 * time.Second) // имитация долгой задачи
 
 	taskResult := rand.Intn(2) == 1
 	if !taskResult {
 		repository.UpdateStatus(t.ID, model.StatusError, "Нет данных")
-		log.Printf("[ERROR] Задача %s завершилась с ошибкой: результат = \"Нет данных\"", t.ID)
+		log.Printf("[SERVICE][FAIL] Задача ID=%s завершена с ошибкой: результат=\"Нет данных\"", t.ID)
 	} else {
 		repository.UpdateStatus(t.ID, model.StatusDone, "Результат готов")
-		log.Printf("[DONE] Задача %s завершена: результат = \"Результат готов\"", t.ID)
+		log.Printf("[SERVICE][DONE] Задача ID=%s завершена успешно: результат=\"Результат готов\"", t.ID)
 	}
 }
 
