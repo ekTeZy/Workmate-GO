@@ -52,3 +52,7 @@ func RunTask(t *model.Task) (*model.Task, error) {
 
 	return t, nil
 }
+
+func GetTaskByID(id string) (*model.Task, bool) {
+	return repository.GetTaskByID(id)
+}
